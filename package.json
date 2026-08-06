@@ -10,6 +10,7 @@
   ],
   "scripts": {
     "build": "npm run typecheck && npm run --workspaces --if-present build",
+    "postbuild": "node -e \"const fs=require('fs'); fs.cpSync('artifacts/builder-card/dist/public', 'public', {recursive: true}); fs.mkdirSync('artifacts/api-server/public', {recursive: true}); fs.cpSync('artifacts/builder-card/dist/public', 'artifacts/api-server/public', {recursive: true});\"",
     "typecheck:libs": "tsc --build",
     "typecheck": "npm run typecheck:libs && npm run --workspaces --if-present typecheck",
     "dev:builder-card": "npm run dev --workspace=@workspace/builder-card",
