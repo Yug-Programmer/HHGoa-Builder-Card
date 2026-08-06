@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "HH Goa Builder Card Generator"
+description = "A branded builder ID card generator for HH Goa 2026 (Hacker House Goa). Users upload a photo, crop it, fill in their name/role/stack, and get a premium 1080x1350 PNG card they can download and share on X with #FrameInGoa. No login required."
+version = "1.0.0"
+id = "artifacts/builder-card"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23460
+
+[services.development]
+run = "pnpm --filter @workspace/builder-card run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/builder-card", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/builder-card/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23460"
+BASE_PATH = "/"

@@ -3,13 +3,15 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: HH Goa Builder Card Generator API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: cards
+    description: Builder card operations
 paths:
   /healthz:
     get:
@@ -24,6 +26,58 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /cards:
+    post:
+      operationId: saveCard
+      tags: [cards]
+      summary: Save a generated builder card
+      description: Accepts a generated PNG card image (as base64) plus metadata. Returns a unique share ID and URL.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CardInput"
+      responses:
+        "201":
+          description: Card saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Card"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /cards/{id}:
+    get:
+      operationId: getCard
+      tags: [cards]
+      summary: Get a saved builder card by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Card found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Card"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +88,65 @@ components:
       required:
         - status
 
+    CardInput:
+      type: object
+      required:
+        - imageBase64
+        - name
+      properties:
+        imageBase64:
+          type: string
+          description: Base64-encoded PNG image of the generated card
+        name:
+          type: string
+        role:
+          type: ["string", "null"]
+        stack:
+          type: ["string", "null"]
+        country:
+          type: ["string", "null"]
+        githubUsername:
+          type: ["string", "null"]
+        builderTitle:
+          type: ["string", "null"]
+
+    Card:
+      type: object
+      required:
+        - id
+        - name
+        - imageUrl
+        - shareUrl
+        - createdAt
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        role:
+          type: ["string", "null"]
+        stack:
+          type: ["string", "null"]
+        country:
+          type: ["string", "null"]
+        githubUsername:
+          type: ["string", "null"]
+        builderTitle:
+          type: ["string", "null"]
+        imageUrl:
+          type: string
+          description: URL to the saved card PNG image
+        shareUrl:
+          type: string
+          description: Full shareable URL for this card
+        createdAt:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string

@@ -1,0 +1,596 @@
+# ROLE
+
+You are an Elite Staff Software Engineer, Senior UI/UX Designer, Creative Director, React.js Architect, and Node.js Backend Engineer.
+
+Your objective is to build a COMPLETE, PRODUCTION-READY web application.
+
+Do NOT generate placeholder code.
+
+Do NOT skip any functionality.
+
+Do NOT leave TODO comments.
+
+Every feature must be fully implemented.
+
+The final application must be deployable immediately.
+
+==================================================
+
+PROJECT NAME
+
+Builder Card Generator
+
+==================================================
+
+PRIMARY OBJECTIVE
+
+Build a high-performance Builder Card Generator where users can:
+
+• Upload their photo
+• Crop and adjust it
+• Fill in their information
+• Instantly generate a premium developer event card
+• Download the generated card as PNG
+• Share it on X with a pre-filled tweet
+• Generate a unique shareable link with Open Graph preview
+
+The entire experience must take less than 10 seconds.
+
+No login.
+
+No signup.
+
+No authentication.
+
+==================================================
+
+TECH STACK
+
+Frontend
+
+React.js 19
+Vite
+TypeScript
+Tailwind CSS
+Framer Motion
+React Router
+React Hook Form
+Zod
+Axios
+Lucide React
+React Easy Crop
+html-to-image
+Browser Image Compression
+HEIC2ANY
+React Hot Toast
+
+Backend
+
+Node.js
+Express.js
+Sharp
+Multer
+UUID
+Helmet
+Morgan
+Compression
+Dotenv
+Cloudinary SDK
+
+==================================================
+
+PROJECT STRUCTURE
+
+client/
+
+src/
+
+components/
+
+pages/
+
+hooks/
+
+services/
+
+utils/
+
+types/
+
+assets/
+
+styles/
+
+App.tsx
+
+main.tsx
+
+server/
+
+controllers/
+
+routes/
+
+middlewares/
+
+services/
+
+uploads/
+
+generated/
+
+utils/
+
+==================================================
+
+DESIGN SYSTEM
+
+Create a premium futuristic developer event experience.
+
+The design should feel modern and high-end.
+
+Use
+
+Dark Theme
+
+Glassmorphism
+
+Rounded cards
+
+Soft shadows
+
+Animated glowing borders
+
+Floating geometric graphics
+
+Animated background grid
+
+Mouse parallax
+
+Particle effects
+
+Beautiful spacing
+
+Premium typography
+
+Smooth transitions
+
+Everything should look like a polished commercial SaaS product.
+
+Do NOT copy any existing conference branding, logo, graphics, or layout.
+
+==================================================
+
+LANDING PAGE
+
+Hero Section
+
+Large headline
+
+Builder Card Generator
+
+Subtitle
+
+Create your personalized developer event card in seconds.
+
+Primary CTA
+
+Generate My Card
+
+Animated illustration
+
+Floating code blocks
+
+Terminal window graphics
+
+Developer-inspired abstract elements
+
+==================================================
+
+STEP 1
+
+UPLOAD PHOTO
+
+Support
+
+JPG
+
+PNG
+
+WEBP
+
+HEIC
+
+Features
+
+Drag & Drop
+
+Browse Files
+
+Automatic validation
+
+Image compression
+
+Instant preview
+
+Error messages
+
+Maximum size validation
+
+==================================================
+
+STEP 2
+
+IMAGE CROPPER
+
+Allow
+
+Zoom
+
+Rotate
+
+Move
+
+Auto-fit
+
+Face centering when possible
+
+Circular preview
+
+Maintain high quality
+
+==================================================
+
+STEP 3
+
+FORM
+
+Fields
+
+Full Name
+
+Role
+
+Technology Stack
+
+Country
+
+GitHub Username
+
+Builder Title
+
+Builder title should be automatically generated.
+
+Generate random titles such as
+
+Code Wizard
+
+Frontend Ninja
+
+Cloud Architect
+
+Bug Hunter
+
+Deploy Master
+
+AI Builder
+
+Startup Founder
+
+Prompt Engineer
+
+==================================================
+
+LIVE PREVIEW
+
+Every field updates immediately.
+
+No refresh.
+
+No loading.
+
+Smooth animations.
+
+==================================================
+
+CARD GENERATION
+
+Generate
+
+1080x1350 PNG
+
+Premium glass card
+
+Sections
+
+Header
+
+Profile Image
+
+Name
+
+Role
+
+Builder Title
+
+Technology Badges
+
+Unique Builder ID
+
+QR Code
+
+Footer
+
+Use original geometric graphics.
+
+Add subtle glow.
+
+Add decorative elements.
+
+Maintain pixel-perfect alignment.
+
+==================================================
+
+DOWNLOAD
+
+Generate PNG
+
+High Resolution
+
+Fast
+
+Filename
+
+builder-card.png
+
+==================================================
+
+SHARE
+
+Create
+
+Unique Share URL
+
+Example
+
+/cards/{unique-id}
+
+Open Twitter Intent automatically.
+
+Prefill
+
+I just created my Builder Card 🚀
+
+#FrameInGoa
+
+The shared URL must display the generated image as its Open Graph preview.
+
+==================================================
+
+BACKEND
+
+Implement complete REST APIs.
+
+POST /upload
+
+POST /generate
+
+GET /cards/:id
+
+POST /share
+
+Store generated cards.
+
+Generate UUID.
+
+Return metadata.
+
+Optimize all uploaded images.
+
+==================================================
+
+IMAGE PROCESSING
+
+Use Sharp.
+
+Resize intelligently.
+
+Compress images.
+
+Maintain quality.
+
+Generate PNG.
+
+Support portrait.
+
+Support landscape.
+
+Support square images.
+
+Handle off-center photos gracefully.
+
+==================================================
+
+PERFORMANCE
+
+Generation time
+
+Less than 2 seconds
+
+Lazy loading
+
+Code splitting
+
+Dynamic imports
+
+Optimized images
+
+==================================================
+
+RESPONSIVE DESIGN
+
+Perfect responsiveness.
+
+Desktop
+
+Tablet
+
+Mobile
+
+Small phones
+
+Large screens
+
+==================================================
+
+ANIMATIONS
+
+Use Framer Motion.
+
+Upload animation
+
+Fade
+
+Scale
+
+Slide
+
+Glow
+
+Card reveal
+
+Download success
+
+Toast notifications
+
+Confetti after generation
+
+==================================================
+
+ACCESSIBILITY
+
+Keyboard support
+
+ARIA labels
+
+Focus states
+
+Screen reader compatibility
+
+Accessible colors
+
+==================================================
+
+ERROR HANDLING
+
+Invalid images
+
+Unsupported files
+
+Large files
+
+Server errors
+
+Network failures
+
+Retry mechanism
+
+==================================================
+
+CODE QUALITY
+
+Strict TypeScript
+
+Reusable components
+
+Reusable hooks
+
+Reusable utilities
+
+No duplicated code
+
+Clean folder structure
+
+SOLID principles
+
+Readable code
+
+Scalable architecture
+
+==================================================
+
+SECURITY
+
+Helmet
+
+Rate limiting
+
+Input validation
+
+Sanitize inputs
+
+Secure file uploads
+
+Prevent malicious file types
+
+==================================================
+
+TESTING
+
+Every feature should work without modification.
+
+No runtime errors.
+
+No console errors.
+
+No TypeScript errors.
+
+No ESLint errors.
+
+==================================================
+
+FINAL QUALITY CHECKLIST
+
+✓ Upload works
+
+✓ HEIC conversion works
+
+✓ Crop works
+
+✓ Preview updates live
+
+✓ Card generation works
+
+✓ Download works
+
+✓ Unique share URL works
+
+✓ Twitter share works
+
+✓ Mobile responsive
+
+✓ High performance
+
+✓ Accessible
+
+✓ Production-ready
+
+==================================================
+
+IMPORTANT
+
+Do not generate placeholder implementations.
+
+Do not leave incomplete components.
+
+Do not omit any backend logic.
+
+Every button must function.
+
+Every API must be implemented.
+
+Every animation must work.
+
+Every page must be responsive.
+
+Deliver a polished, deployment-ready application with clean architecture and complete functionality.
