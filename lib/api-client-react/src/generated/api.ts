@@ -20,6 +20,10 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AdminCardList,
+  AdminListCardsParams,
+  AdminLoginInput,
+  AdminLoginResult,
   Card,
   CardInput,
   ErrorResponse,
@@ -62,7 +66,6 @@ export const getHealthCheckUrl = () => {
 }
 
 /**
- * Returns server health status
  * @summary Health check
  */
 export const healthCheck = async ( options?: Parameters<typeof customFetch>[1]): Promise<HealthStatus> => {
@@ -140,7 +143,6 @@ export const getSaveCardUrl = () => {
 }
 
 /**
- * Accepts a generated PNG card image (as base64) plus metadata. Returns a unique share ID and URL.
  * @summary Save a generated builder card
  */
 export const saveCard = async (cardInput: CardInput, options?: Parameters<typeof customFetch>[1]): Promise<Card> => {
@@ -268,6 +270,161 @@ export function useGetCard<TData = Awaited<ReturnType<typeof getCard>>, TError =
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetCardQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getAdminLoginUrl = () => {
+
+
+
+
+  return `/api/admin/login`
+}
+
+/**
+ * @summary Admin login
+ */
+export const adminLogin = async (adminLoginInput: AdminLoginInput, options?: Parameters<typeof customFetch>[1]): Promise<AdminLoginResult> => {
+
+  return customFetch<AdminLoginResult>(getAdminLoginUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(adminLoginInput)
+  }
+);}
+
+
+
+
+
+export const getAdminLoginMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminLogin>>, TError,{data: BodyType<AdminLoginInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof adminLogin>>, TError,{data: BodyType<AdminLoginInput>}, TContext> => {
+
+const mutationKey = ['adminLogin'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminLogin>>, {data: BodyType<AdminLoginInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  adminLogin(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminLoginMutationResult = NonNullable<Awaited<ReturnType<typeof adminLogin>>>
+    export type AdminLoginMutationBody = BodyType<AdminLoginInput>
+    export type AdminLoginMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Admin login
+ */
+export const useAdminLogin = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminLogin>>, TError,{data: BodyType<AdminLoginInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof adminLogin>>,
+        TError,
+        {data: BodyType<AdminLoginInput>},
+        TContext
+      > => {
+      return useMutation(getAdminLoginMutationOptions(options));
+    }
+
+export const getAdminListCardsUrl = (params?: AdminListCardsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/admin/cards?${stringifiedParams}` : `/api/admin/cards`
+}
+
+/**
+ * @summary List all cards (admin only)
+ */
+export const adminListCards = async (params?: AdminListCardsParams, options?: Parameters<typeof customFetch>[1]): Promise<AdminCardList> => {
+
+  return customFetch<AdminCardList>(getAdminListCardsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getAdminListCardsQueryKey = (params?: AdminListCardsParams,) => {
+    return [
+    `/api/admin/cards`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getAdminListCardsQueryOptions = <TData = Awaited<ReturnType<typeof adminListCards>>, TError = ErrorType<ErrorResponse>>(params?: AdminListCardsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof adminListCards>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAdminListCardsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminListCards>>> = ({ signal }) => adminListCards(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminListCards>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type AdminListCardsQueryResult = NonNullable<Awaited<ReturnType<typeof adminListCards>>>
+export type AdminListCardsQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary List all cards (admin only)
+ */
+
+export function useAdminListCards<TData = Awaited<ReturnType<typeof adminListCards>>, TError = ErrorType<ErrorResponse>>(
+ params?: AdminListCardsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof adminListCards>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getAdminListCardsQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

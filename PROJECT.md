@@ -4,17 +4,17 @@ A branded Builder ID Card generator for Hacker House Goa 2026. Users upload a ph
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/builder-card run dev` — run the frontend (port from $PORT)
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port from $PORT)
-- `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
+- `npm run dev --workspace=@workspace/builder-card` — run the frontend (port 23460)
+- `npm run dev --workspace=@workspace/api-server` — run the API server (port 8080)
+- `npm run typecheck` — full typecheck across all packages
+- `npm run build` — typecheck + build all packages
+- `npm run codegen --workspace=@workspace/api-spec` — regenerate API hooks and Zod schemas from the OpenAPI spec
+- `npm run push --workspace=@workspace/db` — push DB schema changes (dev only)
 - Required env: `DATABASE_URL` — Postgres connection string
 
 ## Stack
 
-- pnpm workspaces, Node.js 24, TypeScript 5.9
+- npm workspaces, Node.js 24, TypeScript 5.9
 - Frontend: React 19, Vite, Tailwind CSS, Framer Motion, Wouter
 - Photo: react-easy-crop (cropping), html-to-image (PNG export), browser-image-compression, heic2any
 - Animations: canvas-confetti (post-generate burst)
@@ -55,10 +55,6 @@ _Populate as you build — explicit user instructions worth remembering across s
 
 ## Gotchas
 
-- After changing `lib/api-spec/openapi.yaml`, always re-run `pnpm --filter @workspace/api-spec run codegen` before editing route or frontend code.
+- After changing `lib/api-spec/openapi.yaml`, always re-run `npm run codegen --workspace=@workspace/api-spec` before editing route or frontend code.
 - api-server JSON body limit is 15 MB (set in app.ts) — needed for base64-encoded card images.
 - Card images are stored on the api-server filesystem at `uploads/cards/`. These are ephemeral in dev; in production, consider object storage for durability.
-
-## Pointers
-
-- See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details

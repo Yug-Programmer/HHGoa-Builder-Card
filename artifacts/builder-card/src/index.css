@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Imbue:wght@400..900&family=Victor+Mono:wght@400..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Imbue:wght@400..900&family=Poppins:wght@300;400;500;600;700&family=Victor+Mono:wght@400..700&display=swap');
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @plugin "@tailwindcss/typography";
@@ -43,6 +43,7 @@
   --font-sans: var(--app-font-sans);
   --font-serif: var(--app-font-serif);
   --font-mono: var(--app-font-mono);
+  --font-poppins: 'Poppins', sans-serif;
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -52,7 +53,7 @@
 
 :root {
   /* HH Goa Theme (Dark by default) */
-  --background: 150 81% 23%; /* #0B6839 */
+  --background: 150 94.3% 20.8%; /* #036735 */
   --foreground: 0 0% 100%; /* #FFFFFF */
   --border: 150 50% 35%; 
 
@@ -91,7 +92,7 @@
 
 /* Same for .dark since it's fundamentally a dark theme */
 .dark {
-  --background: 150 81% 23%;
+  --background: 150 94.3% 20.8%;
   --foreground: 0 0% 100%;
   --border: 150 50% 35%;
   --card: 150 70% 18%;

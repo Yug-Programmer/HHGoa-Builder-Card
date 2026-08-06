@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { toPng } from 'html-to-image';
 import confetti from 'canvas-confetti';
 import { useLocation } from 'wouter';
-import { Download, Share, RefreshCw, Loader2, ArrowRight } from 'lucide-react';
+import { Download, RefreshCw, Loader2 } from 'lucide-react';
 
 import { useSaveCard } from '@workspace/api-client-react';
 import { toast } from '@/hooks/use-toast';
@@ -13,12 +13,19 @@ import { Label } from '@/components/ui/label';
 import { PhotoUploader } from '@/components/PhotoUploader';
 import { PhotoCropper } from '@/components/PhotoCropper';
 import { BuilderCard } from '@/components/BuilderCard';
+import hackerHouseLogo from '@/assets/hacker-house-logo.png';
+import goaHindiBadge from '@/assets/goa-hindi.svg';
 
 const BUILDER_TITLES = [
-  "Code Wizard", "Frontend Ninja", "Cloud Architect", 
-  "Bug Hunter", "Deploy Master", "AI Builder", 
+  "Code Wizard", "Frontend Ninja", "Cloud Architect",
+  "Bug Hunter", "Deploy Master", "AI Builder",
   "Startup Founder", "Prompt Engineer", "Zero to One", "Ship It"
 ];
+
+const SHARE_CAPTION = `One team. One mission. Endless ideas. 🚀
+See you at HH Goa 2026.
+
+#FrameInGoa #HHGoa2026 #Team #Hackathon #Innovation`;
 
 function generateId() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -33,8 +40,8 @@ export default function Home() {
   const [_, setLocation] = useLocation();
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [rawImage, setRawImage] = useState<string | null>(null);
-  
-  // Card state
+
+  // Card fields (shown on PNG)
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [builderId, setBuilderId] = useState<string>('');
   const [name, setName] = useState<string>('');
@@ -42,6 +49,9 @@ export default function Home() {
   const [stack, setStack] = useState<string>('');
   const [country, setCountry] = useState<string>('');
   const [githubUsername, setGithubUsername] = useState<string>('');
+  const [instagramHandle, setInstagramHandle] = useState<string>('');
+  const [linkedinHandle, setLinkedinHandle] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
   const [builderTitle, setBuilderTitle] = useState<string>('');
 
   const [isGenerating, setIsGenerating] = useState(false);
@@ -75,21 +85,21 @@ export default function Home() {
       toast({ title: "Name is required", variant: "destructive" });
       return;
     }
-    
+
     setIsGenerating(true);
     try {
-      const dataUrl = await toPng(cardRef.current, { 
+      const dataUrl = await toPng(cardRef.current, {
         pixelRatio: 3,
         cacheBust: true,
       });
-      
+
       setGeneratedImage(dataUrl);
 
       const link = document.createElement('a');
       link.download = 'hh-goa-builder-card.png';
       link.href = dataUrl;
       link.click();
-      
+
       confetti({
         particleCount: 100,
         spread: 70,
@@ -101,7 +111,7 @@ export default function Home() {
         title: "Your card is ready!",
         description: "Successfully downloaded to your device.",
       });
-      
+
     } catch (err) {
       console.error(err);
       toast({ title: "Failed to generate image", variant: "destructive" });
@@ -110,39 +120,98 @@ export default function Home() {
     }
   };
 
+  // Convert a base64 data URL to a Blob
+  function dataUrlToBlob(dataUrl: string): Blob {
+    const [header, data] = dataUrl.split(',');
+    const mime = header.match(/:(.*?);/)?.[1] || 'image/png';
+    const bytes = atob(data);
+    const arr = new Uint8Array(bytes.length);
+    for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+    return new Blob([arr], { type: mime });
+  }
+
   const handleShare = async () => {
-    if (!generatedImage) return;
+    if (!generatedImage || !name) return;
 
     setIsSharing(true);
     try {
-      const result = await saveCardMutation.mutateAsync({
-        data: {
-          imageBase64: generatedImage,
-          name,
-          role: role || null,
-          stack: stack || null,
-          country: country || null,
-          githubUsername: githubUsername || null,
-          builderTitle: builderTitle || null
+      // Try saving to backend for a share URL (optional — works without it)
+      let shareUrl = '';
+      try {
+        const result = await saveCardMutation.mutateAsync({
+          data: {
+            imageBase64: generatedImage,
+            name,
+            role: role || null,
+            stack: stack || null,
+            country: country || null,
+            githubUsername: githubUsername || null,
+            instagramHandle: instagramHandle || null,
+            linkedinHandle: linkedinHandle || null,
+            email: email || null,
+            builderTitle: builderTitle || null,
+          }
+        });
+        shareUrl = result.shareUrl;
+        setLocation(`/cards/${result.id}`);
+      } catch {
+        console.warn('Backend unavailable, sharing without share URL');
+      }
+
+      const fullCaption = shareUrl
+        ? `${SHARE_CAPTION}\n${shareUrl}`
+        : SHARE_CAPTION;
+
+      // Detect mobile for Web Share API
+      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+      if (isMobile) {
+        // On mobile: try native share sheet so user can pick X with image attached
+        const imageFile = new File(
+          [dataUrlToBlob(generatedImage)],
+          'hh-goa-builder-card.png',
+          { type: 'image/png' }
+        );
+
+        if (navigator.canShare && navigator.canShare({ files: [imageFile] })) {
+          await navigator.share({
+            title: 'HH Goa 2026 Builder Card',
+            text: fullCaption,
+            files: [imageFile],
+          });
+          toast({
+            title: "Card shared! 🚀",
+            description: "Pick X (Twitter) to post with image.",
+          });
+          return;
         }
-      });
+      }
 
-      const shareUrl = result.shareUrl;
-      const tweetText = encodeURIComponent(`I just created my Builder Card for #HackerHouseGoa #FrameInGoa`);
-      const twitterUrl = `https://twitter.com/intent/tweet?text=${tweetText}&url=${encodeURIComponent(shareUrl)}`;
-      
-      window.open(twitterUrl, '_blank');
-      
+      // Desktop (or mobile fallback): download image + open X compose directly
+      // Step 1: Auto-download the card image
+      const link = document.createElement('a');
+      link.download = 'hh-goa-builder-card.png';
+      link.href = generatedImage;
+      link.click();
+
+      // Step 2: Open X compose with caption pre-filled
+      // Opens x.com/intent/post — if logged in, compose window appears immediately
+      const tweetText = encodeURIComponent(fullCaption);
+      window.open(
+        `https://x.com/intent/post?text=${tweetText}`,
+        '_blank'
+      );
+
       toast({
-        title: "Link copied!",
-        description: "Ready to share on X.",
+        title: "X is open! 📸",
+        description: "Your card image has been downloaded — attach it in X's composer and hit Post!",
+        duration: 8000,
       });
-      
-      setLocation(`/cards/${result.id}`);
 
-    } catch (err) {
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name === 'AbortError') return;
       console.error(err);
-      toast({ title: "Failed to create share link", variant: "destructive" });
+      toast({ title: "Failed to share card", variant: "destructive" });
     } finally {
       setIsSharing(false);
     }
@@ -156,20 +225,33 @@ export default function Home() {
         <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-secondary/20 rounded-full blur-[100px]" />
       </div>
 
-      <header className="mb-8 text-center relative z-10 flex flex-col items-center">
-        <div className="inline-block border border-primary/30 bg-primary/10 text-primary font-mono text-xs px-3 py-1 rounded-full mb-3 tracking-widest uppercase">
-          Builder ID Generator
+      <header className="mt-6 md:mt-10 mb-8 text-center relative z-10 flex flex-col items-center">
+        <div className="relative inline-block w-[92vw] max-w-3xl">
+          <img
+            src={hackerHouseLogo}
+            alt="Hacker House Goa"
+            className="w-full h-auto"
+          />
+          <motion.img
+            src={goaHindiBadge}
+            alt="Goa"
+            className="absolute w-[13%] left-1/2 top-[32%] -translate-x-1/2 -translate-y-1/2 -rotate-6"
+            animate={{ y: [0, -6, 0] }}
+            transition={{ duration: 2.6, repeat: Infinity, ease: 'easeInOut' }}
+          />
         </div>
-        <h1 className="font-serif text-5xl md:text-6xl text-foreground uppercase tracking-tight">
-          Hacker House Goa
-        </h1>
+        <div className="mt-6 max-w-2xl">
+          <p className="font-serif text-lg md:text-xl text-foreground/90 leading-relaxed">
+            Create your unique Builder ID Card for Hacker House Goa. Upload a photo, customize your details, and generate a shareable card to post on X with #FrameInGoa.
+          </p>
+        </div>
       </header>
 
       <div className="w-full max-w-5xl relative z-10">
         <AnimatePresence mode="wait">
-          
+
           {step === 1 && (
-            <motion.div 
+            <motion.div
               key="step1"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -181,30 +263,30 @@ export default function Home() {
           )}
 
           {step === 2 && rawImage && (
-            <motion.div 
+            <motion.div
               key="step2"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               className="w-full"
             >
-              <PhotoCropper 
-                imageSrc={rawImage} 
-                onCropComplete={handleCropComplete} 
-                onCancel={() => setStep(1)} 
+              <PhotoCropper
+                imageSrc={rawImage}
+                onCropComplete={handleCropComplete}
+                onCancel={() => setStep(1)}
               />
             </motion.div>
           )}
 
           {step === 3 && (
-            <motion.div 
+            <motion.div
               key="step3"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               className="w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-start"
             >
-              
+
               {/* Form Section */}
               <div className="space-y-6 order-2 lg:order-1">
                 <div className="bg-card border border-border p-6 rounded-2xl shadow-xl">
@@ -216,12 +298,13 @@ export default function Home() {
                   </div>
 
                   <div className="space-y-4">
+                    {/* Full Name */}
                     <div className="space-y-2">
                       <Label htmlFor="name" className="font-mono text-xs text-muted-foreground uppercase">Full Name *</Label>
-                      <Input 
-                        id="name" 
-                        value={name} 
-                        onChange={e => setName(e.target.value)} 
+                      <Input
+                        id="name"
+                        value={name}
+                        onChange={e => setName(e.target.value)}
                         placeholder="Satoshi Nakamoto"
                         className="font-sans text-lg h-12 bg-black/20 border-border focus-visible:ring-primary"
                         maxLength={30}
@@ -231,11 +314,11 @@ export default function Home() {
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="role" className="font-mono text-xs text-muted-foreground uppercase">Role</Label>
-                        <Input 
-                          id="role" 
-                          value={role} 
-                          onChange={e => setRole(e.target.value)} 
-                          placeholder="e.g. Founder"
+                        <Input
+                          id="role"
+                          value={role}
+                          onChange={e => setRole(e.target.value)}
+                          placeholder="e.g. Developer"
                           className="bg-black/20 border-border focus-visible:ring-primary"
                           maxLength={20}
                         />
@@ -243,11 +326,11 @@ export default function Home() {
 
                       <div className="space-y-2">
                         <Label htmlFor="country" className="font-mono text-xs text-muted-foreground uppercase">Location</Label>
-                        <Input 
-                          id="country" 
-                          value={country} 
-                          onChange={e => setCountry(e.target.value)} 
-                          placeholder="e.g. Japan"
+                        <Input
+                          id="country"
+                          value={country}
+                          onChange={e => setCountry(e.target.value)}
+                          placeholder="e.g. India"
                           className="bg-black/20 border-border focus-visible:ring-primary"
                           maxLength={15}
                         />
@@ -256,25 +339,69 @@ export default function Home() {
 
                     <div className="space-y-2">
                       <Label htmlFor="stack" className="font-mono text-xs text-muted-foreground uppercase">Tech Stack (comma separated)</Label>
-                      <Input 
-                        id="stack" 
-                        value={stack} 
-                        onChange={e => setStack(e.target.value)} 
-                        placeholder="React, Rust, AI"
+                      <Input
+                        id="stack"
+                        value={stack}
+                        onChange={e => setStack(e.target.value)}
+                        placeholder="React, Node.js, AI, Next.js"
                         className="bg-black/20 border-border focus-visible:ring-primary"
                       />
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="github" className="font-mono text-xs text-muted-foreground uppercase">GitHub Handle</Label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono">@</span>
-                        <Input 
-                          id="github" 
-                          value={githubUsername} 
-                          onChange={e => setGithubUsername(e.target.value.replace('@', ''))} 
-                          placeholder="username"
-                          className="pl-8 bg-black/20 border-border focus-visible:ring-primary font-mono"
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="github" className="font-mono text-xs text-muted-foreground uppercase">GitHub Handle</Label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono">@</span>
+                          <Input
+                            id="github"
+                            value={githubUsername}
+                            onChange={e => setGithubUsername(e.target.value.replace('@', ''))}
+                            placeholder="username"
+                            className="pl-8 bg-black/20 border-border focus-visible:ring-primary font-mono"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="instagram" className="font-mono text-xs text-muted-foreground uppercase">Instagram Handle</Label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono">@</span>
+                          <Input
+                            id="instagram"
+                            value={instagramHandle}
+                            onChange={e => setInstagramHandle(e.target.value.replace('@', ''))}
+                            placeholder="username"
+                            className="pl-8 bg-black/20 border-border focus-visible:ring-primary font-mono"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="linkedin" className="font-mono text-xs text-muted-foreground uppercase">LinkedIn Handle</Label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-xs">in/</span>
+                          <Input
+                            id="linkedin"
+                            value={linkedinHandle}
+                            onChange={e => setLinkedinHandle(e.target.value.replace(/^@/, '').replace(/^in\//, ''))}
+                            placeholder="username"
+                            className="pl-9 bg-black/20 border-border focus-visible:ring-primary font-mono"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="email" className="font-mono text-xs text-muted-foreground uppercase">Email Address</Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          value={email}
+                          onChange={e => setEmail(e.target.value)}
+                          placeholder="name@domain.com"
+                          className="bg-black/20 border-border focus-visible:ring-primary font-mono text-xs"
                         />
                       </div>
                     </div>
@@ -290,13 +417,15 @@ export default function Home() {
                         </Button>
                       </div>
                     </div>
+
                   </div>
                 </div>
 
+                {/* Action buttons */}
                 <div className="space-y-4">
                   {!generatedImage ? (
-                    <Button 
-                      className="w-full h-14 text-lg font-bold font-mono bg-primary text-primary-foreground hover:bg-primary/90" 
+                    <Button
+                      className="w-full h-14 text-lg font-bold font-mono bg-primary text-primary-foreground hover:bg-primary/90"
                       onClick={handleDownload}
                       disabled={!name || isGenerating}
                     >
@@ -308,23 +437,28 @@ export default function Home() {
                     </Button>
                   ) : (
                     <div className="grid grid-cols-2 gap-4">
-                      <Button 
+                      <Button
                         variant="outline"
-                        className="h-14 font-bold font-mono border-border hover:bg-white/5" 
+                        className="h-14 font-bold font-mono border-border hover:bg-white/5"
                         onClick={handleDownload}
                       >
                         <Download className="w-5 h-5 mr-2" />
                         SAVE AGAIN
                       </Button>
-                      <Button 
-                        className="h-14 font-bold font-mono bg-secondary text-secondary-foreground hover:bg-secondary/90" 
+                      <Button
+                        className="h-14 font-bold font-mono bg-secondary text-secondary-foreground hover:bg-secondary/90"
                         onClick={handleShare}
                         disabled={isSharing}
                       >
                         {isSharing ? (
                           <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> SHARING...</>
                         ) : (
-                          <><Share className="w-5 h-5 mr-2" /> SHARE ON X</>
+                          <>
+                            <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                            </svg>
+                            POST ON X
+                          </>
                         )}
                       </Button>
                     </div>
@@ -341,15 +475,18 @@ export default function Home() {
                   </span>
                   <span className="font-mono text-[10px] text-primary uppercase tracking-widest font-bold">Live Preview</span>
                 </div>
-                
+
                 <div className="scale-[0.85] sm:scale-100 origin-top">
-                  <BuilderCard 
+                  <BuilderCard
                     ref={cardRef}
                     name={name}
                     role={role}
                     stack={stack}
                     country={country}
                     githubUsername={githubUsername}
+                    instagramHandle={instagramHandle}
+                    linkedinHandle={linkedinHandle}
+                    email={email}
                     builderTitle={builderTitle}
                     photoUrl={photoUrl || undefined}
                     builderId={builderId}

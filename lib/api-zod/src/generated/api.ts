@@ -9,7 +9,6 @@ import * as zod from 'zod';
 
 
 /**
- * Returns server health status
  * @summary Health check
  */
 export const HealthCheckResponse = zod.object({
@@ -18,17 +17,21 @@ export const HealthCheckResponse = zod.object({
 
 
 /**
- * Accepts a generated PNG card image (as base64) plus metadata. Returns a unique share ID and URL.
  * @summary Save a generated builder card
  */
 export const SaveCardBody = zod.object({
-  "imageBase64": zod.string().describe('Base64-encoded PNG image of the generated card'),
+  "imageBase64": zod.string(),
   "name": zod.string(),
   "role": zod.string().nullish(),
   "stack": zod.string().nullish(),
   "country": zod.string().nullish(),
   "githubUsername": zod.string().nullish(),
-  "builderTitle": zod.string().nullish()
+  "instagramHandle": zod.string().nullish(),
+  "linkedinHandle": zod.string().nullish(),
+  "email": zod.string().nullish(),
+  "builderTitle": zod.string().nullish(),
+  "gmail": zod.string().nullish().describe('Gmail address (admin only, not shown on card)'),
+  "mobileNumber": zod.string().nullish().describe('Mobile number (admin only, not shown on card)')
 })
 
 export const SaveCardResponse = zod.object({
@@ -38,9 +41,12 @@ export const SaveCardResponse = zod.object({
   "stack": zod.string().nullish(),
   "country": zod.string().nullish(),
   "githubUsername": zod.string().nullish(),
+  "instagramHandle": zod.string().nullish(),
+  "linkedinHandle": zod.string().nullish(),
+  "email": zod.string().nullish(),
   "builderTitle": zod.string().nullish(),
-  "imageUrl": zod.string().describe('URL to the saved card PNG image'),
-  "shareUrl": zod.string().describe('Full shareable URL for this card'),
+  "imageUrl": zod.string(),
+  "shareUrl": zod.string(),
   "createdAt": zod.coerce.date()
 })
 
@@ -59,10 +65,61 @@ export const GetCardResponse = zod.object({
   "stack": zod.string().nullish(),
   "country": zod.string().nullish(),
   "githubUsername": zod.string().nullish(),
+  "instagramHandle": zod.string().nullish(),
+  "linkedinHandle": zod.string().nullish(),
+  "email": zod.string().nullish(),
   "builderTitle": zod.string().nullish(),
-  "imageUrl": zod.string().describe('URL to the saved card PNG image'),
-  "shareUrl": zod.string().describe('Full shareable URL for this card'),
+  "imageUrl": zod.string(),
+  "shareUrl": zod.string(),
   "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Admin login
+ */
+export const AdminLoginBody = zod.object({
+  "username": zod.string(),
+  "password": zod.string()
+})
+
+export const AdminLoginResponse = zod.object({
+  "token": zod.string()
+})
+
+
+/**
+ * @summary List all cards (admin only)
+ */
+export const adminListCardsQueryPageDefault = 1;
+export const adminListCardsQueryLimitDefault = 50;
+
+export const AdminListCardsQueryParams = zod.object({
+  "page": zod.coerce.number().default(adminListCardsQueryPageDefault),
+  "limit": zod.coerce.number().default(adminListCardsQueryLimitDefault)
+})
+
+export const AdminListCardsResponse = zod.object({
+  "cards": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "role": zod.string().nullish(),
+  "stack": zod.string().nullish(),
+  "country": zod.string().nullish(),
+  "githubUsername": zod.string().nullish(),
+  "instagramHandle": zod.string().nullish(),
+  "linkedinHandle": zod.string().nullish(),
+  "email": zod.string().nullish(),
+  "builderTitle": zod.string().nullish(),
+  "gmail": zod.string().nullish(),
+  "mobileNumber": zod.string().nullish(),
+  "imageUrl": zod.string(),
+  "shareUrl": zod.string(),
+  "createdAt": zod.coerce.date()
+})),
+  "total": zod.number(),
+  "page": zod.number(),
+  "limit": zod.number()
 })
 
 

@@ -1,5 +1,5 @@
 import React, { useRef, useState, useCallback, useEffect } from 'react';
-import { UploadCloud, Image as ImageIcon, Loader2, Camera, X, Circle } from 'lucide-react';
+import { UploadCloud, Image as ImageIcon, Loader2, Camera, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import heic2any from 'heic2any';
@@ -17,6 +17,7 @@ export function PhotoUploader({ onImageUploaded }: PhotoUploaderProps) {
   const [cameraReady, setCameraReady] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [isCapturing, setIsCapturing] = useState(false);
+  const [flash, setFlash] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -127,6 +128,8 @@ export function PhotoUploader({ onImageUploaded }: PhotoUploaderProps) {
     if (!videoRef.current || !canvasRef.current) return;
 
     setIsCapturing(true);
+    setFlash(true);
+    setTimeout(() => setFlash(false), 180);
 
     const video = videoRef.current;
     const canvas = canvasRef.current;
@@ -163,16 +166,16 @@ export function PhotoUploader({ onImageUploaded }: PhotoUploaderProps) {
 
   return (
     <>
-      <div className="w-full max-w-md mx-auto flex flex-col space-y-4">
-        <div className="text-center mb-2">
-          <h2 className="text-2xl font-serif text-white">Upload Your Photo</h2>
-          <p className="text-muted-foreground font-mono text-sm mt-1">Accepts JPG, PNG, WEBP, HEIC</p>
+      <div className="w-full max-w-md mx-auto flex flex-col space-y-6">
+        <div className="text-center mb-1">
+          <h2 className="text-3xl md:text-4xl font-serif font-bold text-white mb-3 tracking-tight">Upload Your Photo</h2>
+          <p className="text-sm text-white/70 font-light tracking-widest uppercase">JPG • PNG • WEBP • HEIC</p>
         </div>
 
         <div
-          className={`border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 ${
-            isDragging ? 'border-primary bg-primary/10' : 'border-border bg-card'
-          } ${isProcessing ? 'opacity-50 pointer-events-none' : 'cursor-pointer hover:border-primary/50'}`}
+          className={`border-2 border-dashed rounded-2xl p-12 text-center transition-all duration-300 ${
+            isDragging ? 'border-[#FEE101] bg-[#FEE101]/5 scale-102' : 'border-white/20 bg-white/5 hover:bg-white/[0.08]'
+          } ${isProcessing ? 'opacity-50 pointer-events-none' : 'cursor-pointer'}`}
           onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
@@ -190,80 +193,58 @@ export function PhotoUploader({ onImageUploaded }: PhotoUploaderProps) {
             }}
           />
 
-          <div className="flex flex-col items-center justify-center space-y-4 pointer-events-none">
+          <div className="flex flex-col items-center justify-center space-y-5 pointer-events-none">
             {isProcessing ? (
-              <Loader2 className="w-12 h-12 text-primary animate-spin" />
+              <Loader2 className="w-14 h-14 text-[#FEE101] animate-spin" />
             ) : (
-              <UploadCloud className="w-12 h-12 text-muted-foreground" />
+              <UploadCloud className="w-14 h-14 text-white/60" />
             )}
-            <div className="space-y-1">
-              <p className="text-sm font-medium text-foreground">
+            <div className="space-y-2">
+              <p className="text-base font-medium text-white">
                 {isProcessing ? "Processing..." : "Click to upload or drag and drop"}
               </p>
-              {!isProcessing && <p className="text-xs text-muted-foreground font-mono">Max 10MB</p>}
+              {!isProcessing && <p className="text-sm text-white/50 font-light">Max 10 MB</p>}
             </div>
           </div>
         </div>
 
         {!isProcessing && (
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              className="flex-1 font-mono font-bold"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <ImageIcon className="w-4 h-4 mr-2" />
-              BROWSE FILES
-            </Button>
-            <Button
-              variant="outline"
-              className="flex-1 font-mono font-bold border-[#FEE101] text-[#FEE101] hover:bg-[#FEE101]/10"
-              onClick={startCamera}
-            >
-              <Camera className="w-4 h-4 mr-2" />
-              TAKE PHOTO
-            </Button>
-          </div>
+          <button
+            type="button"
+            onClick={startCamera}
+            className="w-full active:scale-[0.98] transition-transform duration-150 shadow-lg rounded-full overflow-hidden"
+          >
+            <div className="bg-[#FEE101] rounded-full py-3.5 flex items-center justify-center gap-2">
+              <Camera className="w-5 h-5 text-[#0B6839]" strokeWidth={2.5} />
+              <span className="font-serif font-black text-xl text-[#0B6839] tracking-wide">
+                TAKE PHOTO
+              </span>
+            </div>
+          </button>
         )}
       </div>
 
       {/* Hidden canvas for capture */}
       <canvas ref={canvasRef} className="hidden" />
 
-      {/* Camera Modal */}
+      {/* Camera Modal — iOS-style full-bleed camera UI */}
       <AnimatePresence>
         {cameraOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
-            onClick={(e) => { if (e.target === e.currentTarget) stopCamera(); }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black"
           >
             <motion.div
-              initial={{ scale: 0.92, opacity: 0 }}
+              initial={{ scale: 1.02, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.92, opacity: 0 }}
-              transition={{ type: 'spring', damping: 22, stiffness: 260 }}
-              className="relative w-full max-w-lg rounded-2xl overflow-hidden bg-[#0B6839] border border-[#FEE101]/30 shadow-2xl"
+              exit={{ scale: 1.02, opacity: 0 }}
+              transition={{ type: 'spring', damping: 26, stiffness: 300 }}
+              className="relative w-full h-full sm:max-w-md sm:h-[90vh] sm:my-auto sm:rounded-[2.5rem] overflow-hidden bg-black shadow-2xl sm:border sm:border-white/10"
             >
-              {/* Header */}
-              <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
-                <div className="flex items-center gap-2">
-                  <Camera className="w-5 h-5 text-[#FEE101]" />
-                  <span className="font-mono font-bold text-white text-sm tracking-wider">CAMERA</span>
-                </div>
-                <button
-                  onClick={stopCamera}
-                  className="text-white/60 hover:text-white transition-colors"
-                  aria-label="Close camera"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              {/* Video / Error area */}
-              <div className="relative bg-black aspect-video flex items-center justify-center">
+              {/* Video / Error area — fills the whole frame */}
+              <div className="absolute inset-0 bg-black flex items-center justify-center">
                 {!cameraError ? (
                   <>
                     <video
@@ -277,56 +258,84 @@ export function PhotoUploader({ onImageUploaded }: PhotoUploaderProps) {
                     />
                     {!cameraReady && (
                       <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black">
-                        <Loader2 className="w-8 h-8 text-[#FEE101] animate-spin" />
-                        <p className="font-mono text-xs text-white/60">Starting camera...</p>
+                        <Loader2 className="w-7 h-7 text-white/70 animate-spin" />
+                        <p className="text-xs text-white/40 tracking-wide">Starting camera…</p>
                       </div>
                     )}
-                    {/* Circular guide overlay */}
+                    {/* Face guide — thin, minimal, iOS-like */}
                     {cameraReady && (
                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <div className="w-48 h-48 rounded-full border-2 border-[#FEE101]/60 border-dashed shadow-[0_0_0_9999px_rgba(0,0,0,0.35)]" />
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ duration: 0.4, ease: 'easeOut' }}
+                          className="w-52 h-52 rounded-full border border-white/50"
+                        />
                       </div>
                     )}
                   </>
                 ) : (
                   <div className="flex flex-col items-center gap-3 p-8 text-center">
                     <Camera className="w-10 h-10 text-white/30" />
-                    <p className="font-mono text-sm text-white/70">{cameraError}</p>
+                    <p className="text-sm text-white/60 font-light">{cameraError}</p>
                   </div>
                 )}
               </div>
 
-              {/* Footer controls */}
-              <div className="px-5 py-5 flex items-center justify-center gap-4">
+              {/* Capture flash */}
+              <AnimatePresence>
+                {flash && (
+                  <motion.div
+                    initial={{ opacity: 0.9 }}
+                    animate={{ opacity: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.18 }}
+                    className="absolute inset-0 bg-white pointer-events-none"
+                  />
+                )}
+              </AnimatePresence>
+
+              {/* Top gradient + close button */}
+              <div className="absolute top-0 inset-x-0 h-28 bg-gradient-to-b from-black/60 via-black/20 to-transparent pointer-events-none" />
+              <button
+                onClick={stopCamera}
+                aria-label="Close camera"
+                className="absolute top-[calc(env(safe-area-inset-top)+16px)] right-4 w-9 h-9 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white/90 hover:bg-black/60 active:scale-90 transition-all"
+              >
+                <X className="w-[18px] h-[18px]" strokeWidth={2.5} />
+              </button>
+
+              {/* Bottom gradient + controls */}
+              <div className="absolute bottom-0 inset-x-0 pt-16 pb-[calc(env(safe-area-inset-bottom)+28px)] bg-gradient-to-t from-black/85 via-black/40 to-transparent flex flex-col items-center gap-3">
+                {cameraReady && !cameraError && (
+                  <p className="text-[11px] text-white/50 font-light tracking-wide mb-1">
+                    Position your face in the circle
+                  </p>
+                )}
+
                 {!cameraError ? (
                   <button
                     disabled={!cameraReady || isCapturing}
                     onClick={capturePhoto}
                     aria-label="Capture photo"
-                    className="relative w-16 h-16 rounded-full bg-[#FEE101] hover:bg-[#FEE101]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150 active:scale-95 flex items-center justify-center shadow-[0_0_24px_rgba(254,225,1,0.4)] focus:outline-none focus:ring-2 focus:ring-[#FEE101] focus:ring-offset-2 focus:ring-offset-[#0B6839]"
+                    className="relative w-[72px] h-[72px] rounded-full disabled:opacity-40 transition-transform duration-150 active:scale-90 flex items-center justify-center focus:outline-none"
                   >
-                    {isCapturing ? (
-                      <Loader2 className="w-7 h-7 text-[#0B6839] animate-spin" />
-                    ) : (
-                      <Circle className="w-7 h-7 text-[#0B6839] fill-[#0B6839]" />
+                    <span className="absolute inset-0 rounded-full border-[3.5px] border-white" />
+                    <span className="absolute inset-[5px] rounded-full bg-white transition-transform duration-150 group-active:scale-90" />
+                    {isCapturing && (
+                      <Loader2 className="relative w-6 h-6 text-black/70 animate-spin" />
                     )}
                   </button>
                 ) : (
                   <Button
                     variant="outline"
-                    className="font-mono font-bold border-[#FEE101] text-[#FEE101] hover:bg-[#FEE101]/10"
+                    className="font-medium border-white/30 text-white hover:bg-white/10"
                     onClick={stopCamera}
                   >
                     Close
                   </Button>
                 )}
               </div>
-
-              {cameraReady && !cameraError && (
-                <p className="text-center font-mono text-xs text-white/40 pb-3 -mt-1">
-                  Position your face in the circle, then tap the button
-                </p>
-              )}
             </motion.div>
           </motion.div>
         )}

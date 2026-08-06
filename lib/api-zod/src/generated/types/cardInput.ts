@@ -7,7 +7,6 @@
  */
 
 export interface CardInput {
-  /** Base64-encoded PNG image of the generated card */
   imageBase64: string;
   name: string;
   /** @nullable */
@@ -19,5 +18,21 @@ export interface CardInput {
   /** @nullable */
   githubUsername?: string | null;
   /** @nullable */
+  instagramHandle?: string | null;
+  /** @nullable */
+  linkedinHandle?: string | null;
+  /** @nullable */
+  email?: string | null;
+  /** @nullable */
   builderTitle?: string | null;
+  /**
+     * Gmail address (admin only, not shown on card)
+     * @nullable
+     */
+  gmail?: string | null;
+  /**
+     * Mobile number (admin only, not shown on card)
+     * @nullable
+     */
+  mobileNumber?: string | null;
 }

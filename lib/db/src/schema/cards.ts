@@ -9,7 +9,12 @@ export const cardsTable = pgTable("cards", {
   stack: text("stack"),
   country: text("country"),
   githubUsername: text("github_username"),
+  instagramHandle: text("instagram_handle"),
+  linkedinHandle: text("linkedin_handle"),
+  email: text("email"),
   builderTitle: text("builder_title"),
+  gmail: text("gmail"),
+  mobileNumber: text("mobile_number"),
   imagePath: text("image_path").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });

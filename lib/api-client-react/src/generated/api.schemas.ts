@@ -10,7 +10,6 @@ export interface HealthStatus {
 }
 
 export interface CardInput {
-  /** Base64-encoded PNG image of the generated card */
   imageBase64: string;
   name: string;
   /** @nullable */
@@ -22,7 +21,23 @@ export interface CardInput {
   /** @nullable */
   githubUsername?: string | null;
   /** @nullable */
+  instagramHandle?: string | null;
+  /** @nullable */
+  linkedinHandle?: string | null;
+  /** @nullable */
+  email?: string | null;
+  /** @nullable */
   builderTitle?: string | null;
+  /**
+     * Gmail address (admin only, not shown on card)
+     * @nullable
+     */
+  gmail?: string | null;
+  /**
+     * Mobile number (admin only, not shown on card)
+     * @nullable
+     */
+  mobileNumber?: string | null;
 }
 
 export interface Card {
@@ -37,15 +52,68 @@ export interface Card {
   /** @nullable */
   githubUsername?: string | null;
   /** @nullable */
+  instagramHandle?: string | null;
+  /** @nullable */
+  linkedinHandle?: string | null;
+  /** @nullable */
+  email?: string | null;
+  /** @nullable */
   builderTitle?: string | null;
-  /** URL to the saved card PNG image */
   imageUrl: string;
-  /** Full shareable URL for this card */
   shareUrl: string;
   createdAt: string;
+}
+
+export interface AdminCard {
+  id: string;
+  name: string;
+  /** @nullable */
+  role?: string | null;
+  /** @nullable */
+  stack?: string | null;
+  /** @nullable */
+  country?: string | null;
+  /** @nullable */
+  githubUsername?: string | null;
+  /** @nullable */
+  instagramHandle?: string | null;
+  /** @nullable */
+  linkedinHandle?: string | null;
+  /** @nullable */
+  email?: string | null;
+  /** @nullable */
+  builderTitle?: string | null;
+  /** @nullable */
+  gmail?: string | null;
+  /** @nullable */
+  mobileNumber?: string | null;
+  imageUrl: string;
+  shareUrl: string;
+  createdAt: string;
+}
+
+export interface AdminCardList {
+  cards: AdminCard[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export interface AdminLoginInput {
+  username: string;
+  password: string;
+}
+
+export interface AdminLoginResult {
+  token: string;
 }
 
 export interface ErrorResponse {
   error: string;
 }
+
+export type AdminListCardsParams = {
+page?: number;
+limit?: number;
+};
 

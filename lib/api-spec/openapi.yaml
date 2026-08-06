@@ -12,13 +12,14 @@ tags:
     description: Health operations
   - name: cards
     description: Builder card operations
+  - name: admin
+    description: Admin operations
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -32,7 +33,6 @@ paths:
       operationId: saveCard
       tags: [cards]
       summary: Save a generated builder card
-      description: Accepts a generated PNG card image (as base64) plus metadata. Returns a unique share ID and URL.
       requestBody:
         required: true
         content:
@@ -78,15 +78,69 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /admin/login:
+    post:
+      operationId: adminLogin
+      tags: [admin]
+      summary: Admin login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminLoginInput"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminLoginResult"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /admin/cards:
+    get:
+      operationId: adminListCards
+      tags: [admin]
+      summary: List all cards (admin only)
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: number
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: number
+            default: 50
+      responses:
+        "200":
+          description: List of all cards with private data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminCardList"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   schemas:
     HealthStatus:
       type: object
+      required: [status]
       properties:
         status:
           type: string
-      required:
-        - status
 
     CardInput:
       type: object
@@ -96,7 +150,6 @@ components:
       properties:
         imageBase64:
           type: string
-          description: Base64-encoded PNG image of the generated card
         name:
           type: string
         role:
@@ -107,17 +160,24 @@ components:
           type: ["string", "null"]
         githubUsername:
           type: ["string", "null"]
+        instagramHandle:
+          type: ["string", "null"]
+        linkedinHandle:
+          type: ["string", "null"]
+        email:
+          type: ["string", "null"]
         builderTitle:
           type: ["string", "null"]
+        gmail:
+          type: ["string", "null"]
+          description: Gmail address (admin only, not shown on card)
+        mobileNumber:
+          type: ["string", "null"]
+          description: Mobile number (admin only, not shown on card)
 
     Card:
       type: object
-      required:
-        - id
-        - name
-        - imageUrl
-        - shareUrl
-        - createdAt
+      required: [id, name, imageUrl, shareUrl, createdAt]
       properties:
         id:
           type: string
@@ -131,22 +191,92 @@ components:
           type: ["string", "null"]
         githubUsername:
           type: ["string", "null"]
+        instagramHandle:
+          type: ["string", "null"]
+        linkedinHandle:
+          type: ["string", "null"]
+        email:
+          type: ["string", "null"]
         builderTitle:
           type: ["string", "null"]
         imageUrl:
           type: string
-          description: URL to the saved card PNG image
         shareUrl:
           type: string
-          description: Full shareable URL for this card
         createdAt:
           type: string
           format: date-time
 
+    AdminCard:
+      type: object
+      required: [id, name, imageUrl, shareUrl, createdAt]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        role:
+          type: ["string", "null"]
+        stack:
+          type: ["string", "null"]
+        country:
+          type: ["string", "null"]
+        githubUsername:
+          type: ["string", "null"]
+        instagramHandle:
+          type: ["string", "null"]
+        linkedinHandle:
+          type: ["string", "null"]
+        email:
+          type: ["string", "null"]
+        builderTitle:
+          type: ["string", "null"]
+        gmail:
+          type: ["string", "null"]
+        mobileNumber:
+          type: ["string", "null"]
+        imageUrl:
+          type: string
+        shareUrl:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    AdminCardList:
+      type: object
+      required: [cards, total, page, limit]
+      properties:
+        cards:
+          type: array
+          items:
+            $ref: "#/components/schemas/AdminCard"
+        total:
+          type: number
+        page:
+          type: number
+        limit:
+          type: number
+
+    AdminLoginInput:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+
+    AdminLoginResult:
+      type: object
+      required: [token]
+      properties:
+        token:
+          type: string
+
     ErrorResponse:
       type: object
-      required:
-        - error
+      required: [error]
       properties:
         error:
           type: string

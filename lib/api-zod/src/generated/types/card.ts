@@ -18,10 +18,14 @@ export interface Card {
   /** @nullable */
   githubUsername?: string | null;
   /** @nullable */
+  instagramHandle?: string | null;
+  /** @nullable */
+  linkedinHandle?: string | null;
+  /** @nullable */
+  email?: string | null;
+  /** @nullable */
   builderTitle?: string | null;
-  /** URL to the saved card PNG image */
   imageUrl: string;
-  /** Full shareable URL for this card */
   shareUrl: string;
   createdAt: Date;
 }
