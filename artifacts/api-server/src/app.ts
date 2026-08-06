@@ -1,8 +1,13 @@
 import express, { type Express } from "express";
 import cors from "cors";
 import pinoHttp from "pino-http";
+import path from "path";
+import { fileURLToPath } from "url";
 import router from "./routes";
 import { logger } from "./lib/logger";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app: Express = express();
 
@@ -31,5 +36,11 @@ app.use(express.urlencoded({ extended: true, limit: "15mb" }));
 
 app.use("/api", router);
 app.use("/", router);
+
+// Serve static frontend files (for Render deployment)
+app.use(express.static(path.join(__dirname, "..", "public")));
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "..", "public", "index.html"));
+});
 
 export default app;
