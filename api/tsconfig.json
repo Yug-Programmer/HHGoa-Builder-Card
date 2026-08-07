@@ -1,0 +1,11 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "target": "es2022",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "noImplicitAny": false,
+    "skipLibCheck": true
+  },
+  "include": ["**/*.ts", "../artifacts/api-server/src/**/*.ts", "../lib/**/*.ts"]
+}
