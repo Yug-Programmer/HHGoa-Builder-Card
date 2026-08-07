@@ -46,3 +46,5 @@ Thumbs.db
 
 .cache/
 .local/
+public
+artifacts/api-server/public
